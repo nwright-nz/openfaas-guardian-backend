@@ -34,7 +34,7 @@ func MakeNewFunctionHandler(metricsOptions metrics.MetricOptions, c garden.Clien
 		// TODO: review why this was here... debugging?
 		// w.WriteHeader(http.StatusNotImplemented)
 
-		//nigel - get rid of the authenticated reg options for now, until I figure out the basics
+		//nigel - need to re-enable this..
 		//options := types.ServiceCreateOptions{}
 		// if len(request.RegistryAuth) > 0 {
 		// 	auth, err := BuildEncodedAuthConfig(request.RegistryAuth, request.Image)
@@ -57,23 +57,19 @@ func MakeNewFunctionHandler(metricsOptions metrics.MetricOptions, c garden.Clien
 		response, err := c.Create(spec)
 
 		result, err := response.Run(procSpec, procIO)
-		// if err != nil {
-		// 	fmt.Println(err.Error())
-		// }
+
 		log.Println(result.ID)
 
-		//response, err := c.ServiceCreate(context.Background(), spec, options)
 		if err != nil {
 			log.Println("hmm - error?", err)
 		}
-		//fmt.Println(err, response)
+
 		log.Println(response, err)
 	}
 }
 
 func makeSpec(request *requests.CreateFunctionRequest, maxRestarts uint64) garden.ContainerSpec {
-
-	//dont know about constraints with grden...
+	//Guardian doesnt do 'constraints' as such. Need to figure out the options here.
 	// linuxOnlyConstraints := []string{"node.platform.os == linux"}
 	// constraints := []string{}
 	// if request.Constraints != nil && len(request.Constraints) > 0 {
@@ -82,10 +78,6 @@ func makeSpec(request *requests.CreateFunctionRequest, maxRestarts uint64) garde
 	// 	constraints = linuxOnlyConstraints
 	// }
 
-	// nets := []swarm.NetworkAttachmentConfig{
-	// 	{Target: request.Network},
-	// }
-	//restartDelay := time.Second * 5
 	port := []garden.NetIn{
 		{ContainerPort: 8080},
 	}
@@ -98,27 +90,6 @@ func makeSpec(request *requests.CreateFunctionRequest, maxRestarts uint64) garde
 		NetIn:      port,
 	}
 
-	// spec := swarm.ServiceSpec{
-	// 	TaskTemplate: swarm.TaskSpec{
-	// 		RestartPolicy: &swarm.RestartPolicy{
-	// 			MaxAttempts: &maxRestarts,
-	// 			Condition:   swarm.RestartPolicyConditionAny,
-	// 			Delay:       &restartDelay,
-	// 		},
-	// 		ContainerSpec: swarm.ContainerSpec{
-	// 			Image:  request.Image,
-	// 			Labels: map[string]string{"function": "true"},
-	// 		},
-	// 		Networks: nets,
-	// 		Placement: &swarm.Placement{
-	// 			Constraints: constraints,
-	// 		},
-	// 	},
-	// 	Annotations: swarm.Annotations{
-	// 		Name: request.Service,
-	// 	},
-	// }
-
 	// TODO: request.EnvProcess should only be set if it's not nil, otherwise we override anything in the Docker image already
 	var env []string
 	if len(request.EnvProcess) > 0 {
@@ -129,7 +100,7 @@ func makeSpec(request *requests.CreateFunctionRequest, maxRestarts uint64) garde
 	}
 
 	if len(env) > 0 {
-		//spec.TaskTemplate.ContainerSpec.Env = env
+
 		spec.Env = env
 	}
 

@@ -51,17 +51,10 @@ func main() {
 
 	log.Printf("HTTP Read Timeout: %s", config.ReadTimeout)
 	log.Printf("HTTP Write Timeout: %s", config.WriteTimeout)
-	//var gardenClient garden.Client
 	gardenHost, gardenPort := config.GuardianHost, config.GuardianPort
 	gardenAddress := gardenHost + ":" + gardenPort
+        gardenClient := client.New(connection.New("tcp", gardenAddress))
 
-	gardenClient := client.New(connection.New("tcp", gardenAddress))
-
-	pingResult := gardenClient.Ping()
-
-	if len(pingResult.Error()) > 0 {
-		log.Fatal("Error connecting to guardian host")
-	}
 	capacity, err := gardenClient.Capacity()
 	if err != nil {
 		log.Fatal("Error retrieving guardian stats")
@@ -69,24 +62,9 @@ func main() {
 		log.Printf("Successful connection. Guardian current capacity: %d Memory in Bytes, %d Disk, %d Maximum number of containers",
 			capacity.MemoryInBytes, capacity.DiskInBytes, capacity.MaxContainers)
 	}
-	// Need to work out a good test for this
-	// if config.UseExternalProvider() {
-	// 	log.Printf("Binding to external function provider: %s", config.FunctionsProviderURL)
-	// } else {
-	// 	var err error
-	// 	gardenClient, err = client.NewEnvClient()
-	// 	if err != nil {
-	// 		log.Fatal("Error with Docker client.")
-	// 	}
-	// 	dockerVersion, err := dockerClient.ServerVersion(context.Background())
-	// 	if err != nil {
-	// 		log.Fatal("Error with Docker server.\n", err)
-	// 	}
-	// 	log.Printf("Docker API version: %s, %s\n", dockerVersion.APIVersion, dockerVersion.Version)
-	// }
 
-	//Nigel - put this back in once you know how it works
-	metricsOptions := metrics.BuildMetricsOptions()
+
+        metricsOptions := metrics.BuildMetricsOptions()
 	metrics.RegisterMetrics(metricsOptions)
 
 	var faasHandlers handlerSet
@@ -114,7 +92,8 @@ func main() {
 		faasHandlers.DeployFunction = internalHandlers.MakeNewFunctionHandler(metricsOptions, gardenClient, maxRestarts)
 		faasHandlers.DeleteFunction = internalHandlers.MakeDeleteFunctionHandler(metricsOptions, gardenClient)
 
-		//faasHandlers.Alert = internalHandlers.MakeAlertHandler(internalHandlers.NewSwarmServiceQuery(gardenClient))
+		//Nigel - To implement the alerting/scaling.
+                //faasHandlers.Alert = internalHandlers.MakeAlertHandler(internalHandlers.NewSwarmServiceQuery(gardenClient))
 
 		// This could exist in a separate process - records the replicas of each swarm service.
 		//functionLabel := "function"
@@ -139,8 +118,9 @@ func main() {
 	// r.StrictSlash(false)	// This didn't work, so register routes twice.
 	r.HandleFunc("/function/{name:[-a-zA-Z_0-9]+}", faasHandlers.Proxy)
 	r.HandleFunc("/function/{name:[-a-zA-Z_0-9]+}/", faasHandlers.Proxy)
-
-	//r.HandleFunc("/system/alert", faasHandlers.Alert)
+	 
+	// TODO: implement alerting
+	//r.HandleFunc("/system/alert", faasHandlers.Alert) 
 	r.HandleFunc("/system/functions", listFunctions).Methods("GET")
 	r.HandleFunc("/system/functions", faasHandlers.DeployFunction).Methods("POST")
 	r.HandleFunc("/system/functions", faasHandlers.DeleteFunction).Methods("DELETE")
@@ -148,8 +128,8 @@ func main() {
 	if faasHandlers.QueuedProxy != nil {
 		r.HandleFunc("/async-function/{name:[-a-zA-Z_0-9]+}/", faasHandlers.QueuedProxy).Methods("POST")
 		r.HandleFunc("/async-function/{name:[-a-zA-Z_0-9]+}", faasHandlers.QueuedProxy).Methods("POST")
-
-		//	r.HandleFunc("/system/async-report", faasHandlers.AsyncReport)
+        //TODO: implement alerting
+		//	r.HandleFunc("/system/async-report", faasHandlers.AsyncReport) 
 	}
 
 	fs := http.FileServer(http.Dir("./assets/"))

@@ -18,17 +18,8 @@ import (
 func MakeFunctionReader(metricsOptions metrics.MetricOptions, c garden.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		//serviceFilter := filters.NewArgs()
-
-		// options := types.ServiceListOptions{
-		// 	Filters: serviceFilter,
-		// }
-
-		//services, err := c.ServiceList(context.Background(), options)
-
 		var m = make(map[string]string)
-
-		services, err := c.Containers(m)
+                services, err := c.Containers(m)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -38,28 +29,17 @@ func MakeFunctionReader(metricsOptions metrics.MetricOptions, c garden.Client) h
 
 		for _, service := range services {
 			functionProp, err := service.Property("function")
-			print(functionProp)
-			//if len(service.Spec.TaskTemplate.ContainerSpec.Labels["function"]) > 0 {
 			if err != nil {
-				print("*********************There are no functions", err)
-			} else {
-				print(functionProp)
-				containerName, err := service.Property("name")
-				fmt.Println(err)
+                           fmt.Printf("error trying to get function property")
+                        }
+                        if functionProp == "true" {
+                        containerName, err := service.Property("name")
 				imageName, err := service.Property("image")
-				//if len(service.Property("function")) > 0 {
 				var envProcess string
 
-				//envs, err := service.Property("env")
-				// for _, envs := range service.Spec.TaskTemplate.ContainerSpec.Env {
-				// 	if strings.Contains(env, "fprocess=") {
-				// 		envProcess = env[len("fprocess="):]
-				// 	}
-				// }
-
+				
 				f := requests.Function{
 					Name: containerName,
-					//Image:           service.Spec.TaskTemplate.ContainerSpec.Image,
 					Image:           imageName,
 					InvocationCount: 0,
 					//Replicas:        *service.Spec.Mode.Replicated.Replicas,
@@ -70,10 +50,11 @@ func MakeFunctionReader(metricsOptions metrics.MetricOptions, c garden.Client) h
 				functions = append(functions, f)
 
 				if err != nil {
-					print("There was an error doing something, error is: ", service)
+					print("There was an error retrieving info about the service: ", service)
 				}
+                           }
 			}
-		}
+		
 
 		functionBytes, _ := json.Marshal(functions)
 		w.Header().Set("Content-Type", "application/json")

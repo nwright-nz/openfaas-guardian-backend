@@ -96,12 +96,7 @@ func lookupInvoke(w http.ResponseWriter, r *http.Request, metrics metrics.Metric
 
 func lookupSwarmService(serviceName string, c garden.Client) (bool, error) {
 	fmt.Printf("Resolving: '%s'\n", serviceName)
-	// serviceFilter := filters.NewArgs()
-	// serviceFilter.Add("name", serviceName)
 	var m = map[string]string{"garden.state": "created"}
-	//m["garden.state"] = "created"
-
-	//services, err := c.ServiceList(context.Background(), types.ServiceListOptions{Filters: serviceFilter})
 	services, err := c.Containers(m)
 	return len(services) > 0, err
 }
@@ -122,13 +117,12 @@ func invokeService(c garden.Client, w http.ResponseWriter, r *http.Request, metr
 		dnsrr = true
 	}
 
-	//watchdogPort := 8080
-	//watchdogPort := 61008
-	//addr := service
+	
 	watchdogPort := 0
 	addr := "0"
-	//OK, I need to get the external port.
-	//so, get the container reference - then the net-in?
+	
+	// I'm using port mapping to access the container - so this is why Im looking up the host port here. 
+	// When doing the CF integration work, I'll go to route lookups
 	services, err := c.Containers(map[string]string{"name": service})
 	for _, service := range services {
 		info, err := service.Info()
@@ -140,7 +134,7 @@ func invokeService(c garden.Client, w http.ResponseWriter, r *http.Request, metr
 		addr = info.ExternalIP
 	}
 
-	//addr := "10.244.0.2"
+	
 	// Use DNS-RR via tasks.servicename if enabled as override, otherwise VIP.
 	if dnsrr {
 		entries, lookupErr := net.LookupIP(fmt.Sprintf("tasks.%s", service))

@@ -22,7 +22,7 @@ EXPOSE 8080
 ENV http_proxy      ""
 ENV https_proxy     ""
 
-COPY --from=build /go/src/github.com/alexellis/faas/gateway/gateway    .
+COPY --from=build /go/src/github.com/nwrightnz/openfaas-guardian-backend    .
 
 COPY assets     assets
 

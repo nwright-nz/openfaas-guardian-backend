@@ -42,8 +42,6 @@ func MakeDeleteFunctionHandler(metricsOptions metrics.MetricOptions, c garden.Cl
 			fmt.Println("i can get th service list ok")
 		}
 
-		//fmt.Println("********** - Service Name: " + req.FunctionName)
-
 		// TODO: Filter only "faas" functions (via metadata?)
 		var serviceIDs []string
 
@@ -58,13 +56,12 @@ func MakeDeleteFunctionHandler(metricsOptions metrics.MetricOptions, c garden.Cl
 			}
 			nameProperty, err := service.Property("name")
 			if err != nil {
-				fmt.Println("There is an error getting the container handle..", err)
+				fmt.Println("There is an error getting the container handle.", err)
 			}
 			isFunction := len(serviceProperties) > 0
-			fmt.Println("*************----", isFunction, nameProperty)
 
 			if isFunction && req.FunctionName == nameProperty {
-				fmt.Println("Its a function, and the name matches!")
+				fmt.Println("Its a function, and the name matches, adding to the kill list")
 				serviceIDs = append(serviceIDs, nameProperty)
 			} else {
 				fmt.Println("There is a problem matching the name")
