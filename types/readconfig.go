@@ -97,6 +97,16 @@ func (ReadConfig) Read(hasEnv HasEnv) GatewayConfig {
 		cfg.PrometheusHost = prometheusHost
 	}
 
+	guardianHost := hasEnv.Getenv("faas_guardian_host")
+	if len(guardianHost) > 0 {
+		cfg.GuardianHost = guardianHost
+	}
+
+	guardianPort := hasEnv.Getenv("faas_guardian_port")
+	if len(guardianPort) > 0 {
+		cfg.GuardianPort = guardianPort
+
+	}
 	return cfg
 }
 
@@ -109,6 +119,8 @@ type GatewayConfig struct {
 	NATSPort             *int
 	PrometheusHost       string
 	PrometheusPort       int
+	GuardianHost         string
+	GuardianPort         string
 }
 
 // UseNATS Use NATSor not

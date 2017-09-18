@@ -10,8 +10,8 @@ import (
 
 	"code.cloudfoundry.org/garden"
 
-	"github.com/alexellis/faas/gateway/metrics"
-	"github.com/alexellis/faas/gateway/requests"
+	"github.com/nwright-nz/openfaas-guardian-backend/metrics"
+	"github.com/nwright-nz/openfaas-guardian-backend/requests"
 )
 
 // MakeFunctionReader gives a summary of Function structs with Docker service stats overlaid with Prometheus counters.

@@ -1,20 +1,34 @@
-package: github.com/alexellis/faas/gateway
+package: .
 import:
+- package: code.cloudfoundry.org/garden
+  subpackages:
+  - client
+  - client/connection
 - package: github.com/Sirupsen/logrus
+  version: ^1.0.3
 - package: github.com/alexellis/faas-nats
+  version: "0.1"
   subpackages:
   - handler
-- package: github.com/docker/distribution
+- package: github.com/alexellis/faas
+  version: 0.6.5
   subpackages:
-  - reference
-- package: github.com/docker/docker
-  subpackages:
-  - api/types
-  - api/types/filters
-  - api/types/swarm
-  - client
-  - registry
+  - gateway/queue
 - package: github.com/gorilla/mux
+  version: v1.5.0
+- package: github.com/nwright-nz/openfaas-guardian-backend
+  subpackages:
+  - handlers
+  - metrics
+  - plugin
+  - requests
+  - types
 - package: github.com/prometheus/client_golang
+  version: v0.9.0-pre1
   subpackages:
   - prometheus
+testImport:
+- package: github.com/docker/docker
+  version: v17.05.0-ce-rc3
+  subpackages:
+  - api/types

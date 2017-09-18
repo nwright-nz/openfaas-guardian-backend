@@ -13,12 +13,13 @@ import (
 
 	"code.cloudfoundry.org/garden/client"
 	"code.cloudfoundry.org/garden/client/connection"
+
 	"github.com/Sirupsen/logrus"
 	natsHandler "github.com/alexellis/faas-nats/handler"
-	internalHandlers "github.com/alexellis/faas/gateway/handlers"
-	"github.com/alexellis/faas/gateway/metrics"
-	"github.com/alexellis/faas/gateway/plugin"
-	"github.com/alexellis/faas/gateway/types"
+	internalHandlers "github.com/nwright-nz/openfaas-guardian-backend/handlers"
+	"github.com/nwright-nz/openfaas-guardian-backend/metrics"
+	"github.com/nwright-nz/openfaas-guardian-backend/plugin"
+	"github.com/nwright-nz/openfaas-guardian-backend/types"
 
 	"github.com/gorilla/mux"
 )
@@ -39,7 +40,9 @@ type handlerSet struct {
 }
 
 func main() {
+
 	logger := logrus.Logger{}
+
 	logrus.SetFormatter(&logrus.TextFormatter{})
 
 	osEnv := types.OsEnv{}
@@ -49,10 +52,23 @@ func main() {
 	log.Printf("HTTP Read Timeout: %s", config.ReadTimeout)
 	log.Printf("HTTP Write Timeout: %s", config.WriteTimeout)
 	//var gardenClient garden.Client
+	gardenHost, gardenPort := config.GuardianHost, config.GuardianPort
+	gardenAddress := gardenHost + ":" + gardenPort
 
-	gardenClient := client.New(connection.New("tcp", "10.244.0.2:7777"))
-	//var dockerClient *client.Client
+	gardenClient := client.New(connection.New("tcp", gardenAddress))
 
+	pingResult := gardenClient.Ping()
+
+	if len(pingResult.Error()) > 0 {
+		log.Fatal("Error connecting to guardian host")
+	}
+	capacity, err := gardenClient.Capacity()
+	if err != nil {
+		log.Fatal("Error retrieving guardian stats")
+	} else {
+		log.Printf("Successful connection. Guardian current capacity: %d Memory in Bytes, %d Disk, %d Maximum number of containers",
+			capacity.MemoryInBytes, capacity.DiskInBytes, capacity.MaxContainers)
+	}
 	// Need to work out a good test for this
 	// if config.UseExternalProvider() {
 	// 	log.Printf("Binding to external function provider: %s", config.FunctionsProviderURL)

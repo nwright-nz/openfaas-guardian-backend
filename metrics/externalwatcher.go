@@ -13,7 +13,7 @@ import (
 
 	"log"
 
-	"github.com/alexellis/faas/gateway/requests"
+	"github.com/nwright-nz/openfaas-guardian-backend/requests"
 )
 
 func AttachExternalWatcher(endpointURL url.URL, metricsOptions MetricOptions, label string, interval time.Duration) {

@@ -10,9 +10,9 @@ import (
 	"net/url"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/alexellis/faas/gateway/metrics"
 	"github.com/alexellis/faas/gateway/queue"
 	"github.com/gorilla/mux"
+	"github.com/nwright-nz/openfaas-guardian-backend/metrics"
 )
 
 // MakeQueuedProxy accepts work onto a queue

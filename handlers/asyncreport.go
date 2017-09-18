@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/alexellis/faas/gateway/metrics"
-	"github.com/alexellis/faas/gateway/requests"
+	"github.com/nwright-nz/openfaas-guardian-backend/metrics"
+	"github.com/nwright-nz/openfaas-guardian-backend/requests"
 )
 
 // MakeAsyncReport makes a handler for asynchronous invocations to report back into.

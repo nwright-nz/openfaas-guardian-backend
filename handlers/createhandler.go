@@ -12,8 +12,8 @@ import (
 
 	"code.cloudfoundry.org/garden"
 
-	"github.com/alexellis/faas/gateway/metrics"
-	"github.com/alexellis/faas/gateway/requests"
+	"github.com/nwright-nz/openfaas-guardian-backend/metrics"
+	"github.com/nwright-nz/openfaas-guardian-backend/requests"
 )
 
 // MakeNewFunctionHandler creates a new function (service) inside the swarm network.

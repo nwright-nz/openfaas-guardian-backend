@@ -4,18 +4,16 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
+
+	"code.cloudfoundry.org/garden/client"
 
 	"fmt"
 
-	"github.com/alexellis/faas/gateway/requests"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
+	"github.com/nwright-nz/openfaas-guardian-backend/requests"
 )
 
 // DefaultMaxReplicas is the amount of replicas a service will auto-scale up to.
@@ -27,11 +25,11 @@ type ServiceQuery interface {
 }
 
 // NewSwarmServiceQuery create new Docker Swarm implementation
-func NewSwarmServiceQuery(c *client.Client) ServiceQuery {
-	return SwarmServiceQuery{
-		c: c,
-	}
-}
+// func NewSwarmServiceQuery(c *client.Client) ServiceQuery {
+// 	return SwarmServiceQuery{
+// 		c: c,
+// 	}
+// }
 
 // SwarmServiceQuery Docker Swarm implementation
 type SwarmServiceQuery struct {
@@ -41,50 +39,51 @@ type SwarmServiceQuery struct {
 // GetReplicas replica count for function
 func (s SwarmServiceQuery) GetReplicas(serviceName string) (uint64, uint64, error) {
 	var err error
-	var currentReplicas uint64
-	maxReplicas := uint64(DefaultMaxReplicas)
-	opts := types.ServiceInspectOptions{
-		InsertDefaults: true,
-	}
-	service, _, err := s.c.ServiceInspectWithRaw(context.Background(), serviceName, opts)
-	if err == nil {
-		currentReplicas = *service.Spec.Mode.Replicated.Replicas
+	//var currentReplicas uint64
+	//maxReplicas := uint64(DefaultMaxReplicas)
+	// opts := types.ServiceInspectOptions{
+	// 	InsertDefaults: true,
+	// }
+	// service, _, err := s.c.ServiceInspectWithRaw(context.Background(), serviceName, opts)
+	// if err == nil {
+	// 	currentReplicas = *service.Spec.Mode.Replicated.Replicas
 
-		replicaLabel := service.Spec.TaskTemplate.ContainerSpec.Labels["com.faas.max_replicas"]
+	// 	replicaLabel := service.Spec.TaskTemplate.ContainerSpec.Labels["com.faas.max_replicas"]
 
-		if len(replicaLabel) > 0 {
-			maxReplicasLabel, err := strconv.Atoi(replicaLabel)
-			if err != nil {
-				log.Printf("Bad replica count: %s, should be uint.\n", replicaLabel)
-			} else {
-				maxReplicas = uint64(maxReplicasLabel)
-			}
-		}
-	}
+	// 	if len(replicaLabel) > 0 {
+	// 		maxReplicasLabel, err := strconv.Atoi(replicaLabel)
+	// 		if err != nil {
+	// 			log.Printf("Bad replica count: %s, should be uint.\n", replicaLabel)
+	// 		} else {
+	// 			maxReplicas = uint64(maxReplicasLabel)
+	// 		}
+	// 	}
+	//}
 
-	return currentReplicas, maxReplicas, err
+	//return currentReplicas, maxReplicas, err
+	return 0, 0, err
 }
 
 // SetReplicas update the replica count
-func (s SwarmServiceQuery) SetReplicas(serviceName string, count uint64) error {
-	opts := types.ServiceInspectOptions{
-		InsertDefaults: true,
-	}
+//func (s SwarmServiceQuery) SetReplicas(serviceName string, count uint64) error {
+// opts := types.ServiceInspectOptions{
+// 	InsertDefaults: true,
+// }
 
-	service, _, err := s.c.ServiceInspectWithRaw(context.Background(), serviceName, opts)
-	if err == nil {
+// service, _, err := s.c.ServiceInspectWithRaw(context.Background(), serviceName, opts)
+// if err == nil {
 
-		service.Spec.Mode.Replicated.Replicas = &count
-		updateOpts := types.ServiceUpdateOptions{}
-		updateOpts.RegistryAuthFrom = types.RegistryAuthFromSpec
+// 	service.Spec.Mode.Replicated.Replicas = &count
+// 	updateOpts := types.ServiceUpdateOptions{}
+// 	updateOpts.RegistryAuthFrom = types.RegistryAuthFromSpec
 
-		_, updateErr := s.c.ServiceUpdate(context.Background(), service.ID, service.Version, service.Spec, updateOpts)
-		if updateErr != nil {
-			err = updateErr
-		}
-	}
-	return err
-}
+// 	_, updateErr := s.c.ServiceUpdate(context.Background(), service.ID, service.Version, service.Spec, updateOpts)
+// 	if updateErr != nil {
+// 		err = updateErr
+// 	}
+// }
+//return err
+//}
 
 // MakeAlertHandler handles alerts from Prometheus Alertmanager
 func MakeAlertHandler(sq ServiceQuery) http.HandlerFunc {

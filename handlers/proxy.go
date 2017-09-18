@@ -18,9 +18,9 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/alexellis/faas/gateway/metrics"
-	"github.com/docker/docker/api/types/filters"
+
 	"github.com/gorilla/mux"
+	"github.com/nwright-nz/openfaas-guardian-backend/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -96,8 +96,8 @@ func lookupInvoke(w http.ResponseWriter, r *http.Request, metrics metrics.Metric
 
 func lookupSwarmService(serviceName string, c garden.Client) (bool, error) {
 	fmt.Printf("Resolving: '%s'\n", serviceName)
-	serviceFilter := filters.NewArgs()
-	serviceFilter.Add("name", serviceName)
+	// serviceFilter := filters.NewArgs()
+	// serviceFilter.Add("name", serviceName)
 	var m = map[string]string{"garden.state": "created"}
 	//m["garden.state"] = "created"
 
